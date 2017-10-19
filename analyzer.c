@@ -8,6 +8,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<unistd.h>
+
 
 //标识符(变量名表)
 typedef struct id{
@@ -38,7 +40,7 @@ int Reserve(char ch[],char *rwtab[]);  //判断是否为保留字表，并返回
 int InsertId(char str[],ID *head_id);    //将标识符插入符号表中;
 int InsertConst(int a, NUM *head_num); //将常数插入符号表中;
 void PrintChar(char ch[],char value);   //输出保留字和分隔符;
-void PrintNum(int num,int id); //输入标识符和常数
+
 int main(void){
     head_id = malloc(sizeof(ID));
     head_id->next = NULL;
@@ -52,27 +54,36 @@ int main(void){
     //char str[50];
     int a;
     while(fscanf(fd,"%s",str)!=EOF){
+        //puts(str);
+        //exit(0);
         //判断str是什么东西
         int i = 0;
         int m = 0;
         while(str[i] != '\0' ){
+            //printf("%d\n",i);
+            //sleep(1);
+            //puts("----------------------");
             ch = str[i];
-            printf("%c\n",ch);
-            //strToken[MAX] = {""};
+           // printf("%c\n",ch);
+            strcpy(strToken,"\0");
             m = 0;
             //判断是否为保留字和是否为标识符;
-            if(IsLetter(ch) == 1)
+            if(IsLetter(ch))
             {
-                while(IsDight(ch) == 1 || IsLetter(ch) ==1){
+                while(IsDight(ch) || IsLetter(ch)){
                     strToken[m] = ch;
                     m++;
-                    ch = str[i++];
+                    ch = str[++i];
                 }
                 //找到一个可能为保留字的字符
                 strToken[m] = '\0';
+                //puts("");
+                //puts(strToken);
+                
                 //确定是保留字
                 if(Reserve(strToken,rwtab) == 1){
                     PrintChar(strToken,'-');
+                    //exit(0);
                 }
                 //确定是否为标识符
                 else{
@@ -81,7 +92,7 @@ int main(void){
                         //将标识符插入符号表中;
                         int get_id;
                         get_id = InsertId(strToken,head_id);
-                        printf(("%d","%d\n"),1,get_id);
+                        printf("(%d,%d)\n",1,get_id);
                     }else{
                         //错误提示
                         printf("标识符最多为4位!");
@@ -91,77 +102,97 @@ int main(void){
                 i--;
             }
             //判断是否为数字或错误提示;
-            if(IsDight(ch) == 1){
+            else if(IsDight(ch)){
                 sum = 0;
-                while(IsDight(ch) == 1){
-                    sum = sum*10 + ch;
-                    ch = str[i++];
-                }if(IsLetter(ch) == 1){
+                while(IsDight(ch)){
+                    sum = sum*10 + ch-'0';
+                    ch = str[++i];
+                }
+               // puts("sdasdasdasds");
+                if(IsLetter(ch) == 1){
                     while(IsLetter(ch)||IsDight(ch)){
-                        ch = str[i++];
+                        ch = str[++i];
                     }
                     printf("错误的变量名!");
                 }else{
-                    InsertConst(sum,head_num);
-                    int get_num;
-                    printf(("%d","%d\n"),2,get_num);
+                    int get_num = InsertConst(sum,head_num);
+                    printf("(%d,%d)\n",2,get_num);
                 }
                 i--;
+                
+                //printf("``````````digg:%d\n",i);
             }
             //判断界符号
             else{
+                m=0;
+                strToken[m] = ch;
+                //puts(strToken);
+                //exit(0);
                 switch(ch){
                 case '<':
                     m = 0;
                     strToken[m] = ch;
-                    ch = str[i++];
+                    ch = str[++i];
                     if(ch == '>'){
-                        strToken[m++] = ch;
+                        strToken[++m] = ch;
                         //PrintChar(strToken)
                     }else if(ch == '='){
-                        strToken[m++] = ch;
+                        strToken[++m] = ch;
                     }else{
-                        ch = strToken[m];
+                        //ch = strToken[m];
                         i--;
+                        strToken[m] = '\0';
                     }
                     PrintChar(strToken,'-');
                     break;
                 case '>':
                     m = 0;
                     strToken[m] = ch;
-                    ch = str[i++];
+                    ch = str[++i];
                     if(ch == '='){
-                        strToken[m++] = ch;
-                    PrintChar(strToken,'-');
-                    break;
-                case ':':
-                    m=0;
-                    strToken[m] = ch;
-                    ch = str[i++];
-                    if(ch=='='){
-                        strToken[m++] = ch;
+                        strToken[++m] = ch;
+                        strToken[m+1] = '\0';
                     }else{
+                        strToken[m-1] = '\0';
                         i--;
                     }
                     PrintChar(strToken,'-');
                     break;
-                case '+':strToken[0] = ch; PrintChar(strToken,'-');break;
+                case ':':
+                    //printf("n``````````um:%d\n",i);
+                    m=0;
+                    strToken[m] = ch;
+                    ch = str[++i];
+                    //printf("dadadasdas%c\n",ch);
+                    if(ch=='='){
+                        strToken[++m] = ch;
+                        strToken[m+1] = '\0';
+                        //puts("dasdasdasdasd");
+                    }else{
+                        strToken[m-1] = '\0';
+                        i--;
+                       // printf("*****%d\n",i);
+                    }
+                    //printf(":=**********%s\n",strToken);
+                    PrintChar(strToken,'-');
+                    break;
+                case '+':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
                 case '-':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '*':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '/':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '(':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case ')':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '=':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case ',':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '.':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case ';':strToken[0] = ch; PrintChar(strToken,'-');break;
+                case '*':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case '/':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case '(':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case ')':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case '=':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case ',':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case '.':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case ';':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
                         }
                 }
+                i++;
 
             }
         }
     }
-}
 
 //判断letter是否为字母,返回值为1时，为字母。
 int IsLetter(char letter){
@@ -174,7 +205,7 @@ int IsLetter(char letter){
 
 //判断ch是否为数字,返回值为1时,为数字.
 int IsDight(char ch){
-    if(ch > '0' && ch < '9')
+    if(ch >= '0' && ch <= '9')
         return 1;
     else 
         return 0;
@@ -227,10 +258,6 @@ int InsertConst(int a,NUM *head_num){
 
 //打印输出保留字结果
 void PrintChar(char ch[],char value){
-    printf("(%s,%c\n)",ch,value);
+    printf("(%s,%c)\n",ch,value);
 }
 
-//打印输出标识符和常数结果
-//void PrintNum(int num,int id){
-//    printf("(%d,%d\n)",num,id);
-//}
