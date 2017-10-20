@@ -39,7 +39,7 @@ int IsDight(char ch);       //判断字符是否为数字;
 int Reserve(char ch[],char *rwtab[]);  //判断是否为保留字表，并返回其编码;
 int InsertId(char str[],ID *head_id);    //将标识符插入符号表中;
 int InsertConst(int a, NUM *head_num); //将常数插入符号表中;
-void PrintChar(char ch[],char value);   //输出保留字和分隔符;
+void PrintChar(FILE *fr,char ch[],char value);   //输出保留字和分隔符;
 
 int main(void){
     head_id = malloc(sizeof(ID));
@@ -51,6 +51,7 @@ int main(void){
     head_num->id = 0;
 
     FILE *fd = fopen("./analyzer.txt","r");
+    FILE *fr = fopen("./print.txt","w"); 
     //char str[50];
     int a;
     while(fscanf(fd,"%s",str)!=EOF){
@@ -82,7 +83,7 @@ int main(void){
                 
                 //确定是保留字
                 if(Reserve(strToken,rwtab) == 1){
-                    PrintChar(strToken,'-');
+                    PrintChar(fr,strToken,'-');
                     //exit(0);
                 }
                 //确定是否为标识符
@@ -92,10 +93,10 @@ int main(void){
                         //将标识符插入符号表中;
                         int get_id;
                         get_id = InsertId(strToken,head_id);
-                        printf("(%d,%d)\n",1,get_id);
+                        fprintf(fr,"(%d,%d)\n",1,get_id);
                     }else{
                         //错误提示
-                        printf("标识符最多为4位!");
+                        fprintf(fr,"标识符最多为4位!");
                     }
                 }
                 //后退一位
@@ -113,10 +114,10 @@ int main(void){
                     while(IsLetter(ch)||IsDight(ch)){
                         ch = str[++i];
                     }
-                    printf("错误的变量名!");
+                    fprintf(fr,"错误的变量名!");
                 }else{
                     int get_num = InsertConst(sum,head_num);
-                    printf("(%d,%d)\n",2,get_num);
+                    fprintf(fr,"(%d,%d)\n",2,get_num);
                 }
                 i--;
                 
@@ -143,7 +144,7 @@ int main(void){
                         i--;
                         strToken[m] = '\0';
                     }
-                    PrintChar(strToken,'-');
+                    PrintChar(fr,strToken,'-');
                     break;
                 case '>':
                     m = 0;
@@ -156,7 +157,7 @@ int main(void){
                         strToken[m-1] = '\0';
                         i--;
                     }
-                    PrintChar(strToken,'-');
+                    PrintChar(fr,strToken,'-');
                     break;
                 case ':':
                     //printf("n``````````um:%d\n",i);
@@ -174,24 +175,26 @@ int main(void){
                        // printf("*****%d\n",i);
                     }
                     //printf(":=**********%s\n",strToken);
-                    PrintChar(strToken,'-');
+                    PrintChar(fr,strToken,'-');
                     break;
-                case '+':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case '-':strToken[0] = ch; PrintChar(strToken,'-');break;
-                case '*':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case '/':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case '(':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case ')':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case '=':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case ',':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case '.':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
-                case ';':strToken[0] = ch;strToken[1] = '\0'; PrintChar(strToken,'-');break;
+                case '+':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case '-':strToken[0] = ch; PrintChar(fr,strToken,'-');break;
+                case '*':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case '/':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case '(':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case ')':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case '=':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case ',':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case '.':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
+                case ';':strToken[0] = ch;strToken[1] = '\0'; PrintChar(fr,strToken,'-');break;
                         }
                 }
                 i++;
 
             }
         }
+        fclose(fr);
+        fclose(fd);
     }
 
 //判断letter是否为字母,返回值为1时，为字母。
@@ -257,7 +260,8 @@ int InsertConst(int a,NUM *head_num){
 }
 
 //打印输出保留字结果
-void PrintChar(char ch[],char value){
-    printf("(%s,%c)\n",ch,value);
+void PrintChar(FILE *fr,char ch[],char value){
+   fprintf(fr,"(%s,%c)\n",ch,value);
 }
+
 
