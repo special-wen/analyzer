@@ -1,3 +1,4 @@
+
 /*************************************************************************
 	> File Name: read.c
 	> Author: zxw
@@ -38,12 +39,8 @@ int IsLetter(char letter);   //判断字符是否为字母;
 int IsDight(char ch);       //判断字符是否为数字;
 int Reserve(char ch[],char *rwtab[]);  //判断是否为保留字表，并返回其编码;
 int InsertId(char str[],ID *head_id);    //将标识符插入符号表中;
-int IsertId(char ch[],ID *head_id);  //判断字符是否已经插入在符号表中，如果已插入返回其编码
 int InsertConst(int a, NUM *head_num); //将常数插入符号表中;
-int IsertConst(int a,NUM *head_num); 
 void PrintChar(FILE *fr,char ch[],char value);   //输出保留字和分隔符;
-void PrintConst(NUM *head_num);
-void PrintId(ID *head_id);
 
 int main(void){
     head_id = malloc(sizeof(ID));
@@ -96,7 +93,7 @@ int main(void){
                     if(m<=4){
                         //将标识符插入符号表中;
                         int get_id;
-                        get_id = IsertId(strToken,head_id);
+                        get_id = InsertId(strToken,head_id);
                         fprintf(fr,"(%d,%d)\n",1,get_id);
                     }else{
                         //错误提示
@@ -120,8 +117,7 @@ int main(void){
                     }
                     fprintf(fr,"错误的变量名!");
                 }else{
-                    int get_num; 
-                    get_num = IsertConst(sum,head_num);
+                    int get_num = InsertConst(sum,head_num);
                     fprintf(fr,"(%d,%d)\n",2,get_num);
                 }
                 i--;
@@ -175,7 +171,7 @@ int main(void){
                         strToken[m+1] = '\0';
                         //puts("dasdasdasdasd");
                     }else{
-                        strToken[m+1] = '\0';
+                        strToken[m-1] = '\0';
                         i--;
                        // printf("*****%d\n",i);
                     }
@@ -198,8 +194,6 @@ int main(void){
 
             }
         }
-        PrintConst(head_num);
-        PrintId(head_id);
         fclose(fr);
         fclose(fd);
     }
@@ -243,26 +237,10 @@ int InsertId(char str[],ID *head_id){
     new->next = temp->next;
     temp->next = new;
     new->id = temp->id + 1;
-    strcpy(new->variable,str);
+    strcpy(temp->variable,str);
     
     return new->id;
 
-}
-
-//判断是否已经将该字符插入到标识符表中,并返回其对应的id
-int IsertId(char ch[],ID *head_id){
-    ID *temp;
-    int num;
-    temp = head_id->next;
-    if(temp != NULL){
-        if(strcmp(ch,temp->variable) != 0){
-            temp = temp->next;
-        }
-        num = temp->id;
-    }else{
-       num =  InsertId(ch,head_id);
-    }
-    return num;
 }
 
 //插入常数表中
@@ -277,54 +255,13 @@ int InsertConst(int a,NUM *head_num){
     new->next = temp->next;
     temp->next = new;
     new->id = temp->id +1;
-    new->vinary = a;
-    //printf("%d\n",temp->id);
-    return new->id;
-}
+    temp->vinary = a;
 
-//判断该常数是否存在常数表中，若存在返回其id,若不存在，插入
-int IsertConst(int a,NUM *head_num){
-    //puts("***********************");
-    NUM *temp;
-    int num_id;
-    temp = head_num->next;
-    if(temp != NULL){
-        if(temp->vinary == a){
-            //puts("DASDADASDAS");
-            return temp->id;
-        }
-        temp = temp->next;
-    }
-        //puts("---------------------");
-        num_id = InsertConst(a,head_num);
-    
-    return num_id;
+    return new->id;
 }
 
 //打印输出保留字结果
 void PrintChar(FILE *fr,char ch[],char value){
    fprintf(fr,"(%s,%c)\n",ch,value);
 }
-//输出常数表
-void PrintConst(NUM *head_num){
-    NUM *temp;
-    FILE *fconst = fopen("./PrintConst.txt","w");
-    temp = head_num->next;
-    while(temp != NULL){
-        fprintf(fconst,"(%d,%d)\n",temp->id,temp->vinary);
-        temp = temp->next;
-    }
-    fclose(fconst);
-}
 
-//输出变量名表
-void PrintId(ID *head_id){
-    ID *temp;
-    FILE *fId = fopen("./PrintId.txt","w");
-    temp = head_id->next;
-    while(temp != NULL){
-        fprintf(fId,"(%s,%d)\n",temp->variable,temp->id);
-        temp = temp->next;
-    }
-    fclose(fId);
-}
