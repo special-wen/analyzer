@@ -19,7 +19,7 @@ typedef struct id{
 }ID;
 //常数表
 typedef struct num{
-    int vinary;
+    char vinary[255];
     int id;
     struct num *next;
 }NUM;
@@ -267,8 +267,20 @@ int IsertId(char ch[],ID *head_id){
 
 //插入常数表中
 int InsertConst(int a,NUM *head_num){
+    printf("----%d----\n",a);
     NUM *temp;
     NUM *new;
+    char array[255];
+    int i;
+    array[254] = '\0';
+    for(i = 253;i>0;i--){
+        array[i] = (char) (a % 2 + '0');
+        a = a/2;
+        if(a == 0){
+            break;
+        }
+    }
+    //printf("%c\n",&array[i]);
     temp = head_num;
     while(temp->next != NULL){
         temp = temp->next;
@@ -277,30 +289,41 @@ int InsertConst(int a,NUM *head_num){
     new->next = temp->next;
     temp->next = new;
     new->id = temp->id +1;
-    new->vinary = a;
-    //printf("%d\n",temp->id);
+    strcpy(new->vinary,&array[i]);
     return new->id;
 }
 
 //判断该常数是否存在常数表中，若存在返回其id,若不存在，插入
 int IsertConst(int a,NUM *head_num){
-    //puts("***********************");
+    printf(" %d \n",a);
     NUM *temp;
+    int num = a;
     int num_id;
+    char array[255];
+    array[254] = '\0';
+    int i;
+    for(i = 253;i>0;i--){
+        array[i] = (char)(a % 2 + '0');
+        a = a/2;
+        if(a == 0)
+            break;
+    }
     temp = head_num->next;
-    if(temp != NULL){
-        if(temp->vinary == a){
-            //puts("DASDADASDAS");
+    printf("erjinzhi:%s\n",&array[i]);
+    while(temp != NULL){
+        printf("temp->vinary %s\n",temp->vinary);
+        if(strcmp(temp->vinary,&array[i]) == 0 ){
+            puts(temp->vinary);
+            puts("------------");
             return temp->id;
+            printf("%d\n",temp->id);
         }
         temp = temp->next;
     }
-        //puts("---------------------");
-        num_id = InsertConst(a,head_num);
-    
+    num_id = InsertConst(num,head_num);
+    printf("%d %d %s\n",num_id ,num,&array[i]); 
     return num_id;
 }
-
 //打印输出保留字结果
 void PrintChar(FILE *fr,char ch[],char value){
    fprintf(fr,"(%s,%c)\n",ch,value);
@@ -311,7 +334,7 @@ void PrintConst(NUM *head_num){
     FILE *fconst = fopen("./PrintConst.txt","w");
     temp = head_num->next;
     while(temp != NULL){
-        fprintf(fconst,"(%d,%d)\n",temp->id,temp->vinary);
+        fprintf(fconst,"(%d,%s)\n",temp->id,temp->vinary);
         temp = temp->next;
     }
     fclose(fconst);
